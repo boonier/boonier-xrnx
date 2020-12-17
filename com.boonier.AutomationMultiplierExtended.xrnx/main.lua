@@ -36,9 +36,14 @@ local ok, err = manifest:load_from("manifest.xml")
 local tool_name = manifest:property("Name").value
 local tool_id = manifest:property("Id").value
 
+
 --------------------------------------------------------------------------------
 -- Main functions
 --------------------------------------------------------------------------------
+
+
+print("set_all_automation=", options.set_all_automation.value)
+
 
 function process_points(automation, float_multiplier)
   local new_points = {}
@@ -115,11 +120,9 @@ local function show_dialog()
       text = "All track automation:"
     },
     vb:checkbox {
-      value = false,
+      value = options.set_all_automation.value,
       notifier = function(value)
-        all_automation = value
-        -- show_status(("checkbox value changed to '%s'"):
-        --   format(tostring(value)))
+        options.set_all_automation.value = value
       end
     }
   }
@@ -135,7 +138,7 @@ local function show_dialog()
       local parameter = rns.selected_parameter
 
       if (parameter ~= nil) then
-        if (all_automation) then
+        if (options.set_all_automation.value) then
           local trk_idx = rns.selected_track_index
 
           for seq_idx, patt_idx in ipairs(rns.sequencer.pattern_sequence) do
@@ -158,8 +161,6 @@ local function show_dialog()
       end
     end
   }
-
-  oprint(renoise.song())
 
   local gui =
     vb:column {
