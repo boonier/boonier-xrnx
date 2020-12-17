@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RenoiseScriptingTool doc_version="0">
+  <ApiVersion>6</ApiVersion>
+  <AutoUpgraded>true</AutoUpgraded>
+  <Id>com.boonier.AutomationType</Id>
+  <Version>1.1</Version>
+  <Author>boonier</Author>
+  <Name>Automation Type Switcher</Name>
+  <Category>Tool Development</Category>
+  <Description>This tool allows you to switch the automation type for a selected device parameter.</Description>
+  <Homepage>http://scripting.renoise.com</Homepage>
+  <Icon>icon.png</Icon>
+  <Platform>Windows, Mac, Linux</Platform>
+</RenoiseScriptingTool>

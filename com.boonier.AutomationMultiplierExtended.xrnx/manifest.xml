@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RenoiseScriptingTool doc_version="0">
+  <ApiVersion>6</ApiVersion>
+  <AutoUpgraded>true</AutoUpgraded>
+  <Id>com.boonier.AutomationMultiplierExtended</Id>
+  <Version>1.0</Version>
+  <Author>boonier</Author>
+  <Name>Automation multiplier Extended</Name>
+  <Category>Automation Editor</Category>
+  <Description>This script adds a context menu entry to multiply the current automation curve by a given value. Extended means that one can apply the operation to all patterns of selected parameter. Based on the work of the original author: It-Alien (Fabio Napodano) | napodano@napodano.com</Description>
+  <Homepage>http://tools.renoise.com</Homepage>
+</RenoiseScriptingTool>
