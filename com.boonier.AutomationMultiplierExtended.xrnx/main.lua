@@ -1,5 +1,4 @@
 _AUTO_RELOAD_DEBUG = true
-print("works")
 -- Placeholder for the dialog
 --
 
@@ -12,16 +11,11 @@ renoise.tool().preferences = options
 --[[============================================================================
 main.lua
 ============================================================================]]
+local rns = renoise.song()
 local dialog = nil
-
 -- Placeholder to expose the ViewBuilder outside the show_dialog() function
 local vb = nil
 local all_automation = false
-
--- Reload the script whenever this file is saved.
--- Additionally, execute the attached function.
-_AUTO_RELOAD_DEBUG = function()
-end
 
 -- Read from the manifest.xml file.
 class "RenoiseScriptingTool"(renoise.Document.DocumentNode)
@@ -36,16 +30,12 @@ local ok, err = manifest:load_from("manifest.xml")
 local tool_name = manifest:property("Name").value
 local tool_id = manifest:property("Id").value
 
-
+print(tool_name .. " updated/loaded!")
 --------------------------------------------------------------------------------
 -- Main functions
 --------------------------------------------------------------------------------
 
-
-print("set_all_automation=", options.set_all_automation.value)
-
-
-function process_points(automation, float_multiplier)
+function process_points(automation, float_multiplier, float_offset)
   local new_points = {}
 
   local polarity = automation.dest_parameter.polarity
@@ -66,7 +56,7 @@ function process_points(automation, float_multiplier)
       float_newvalue = point.value * float_multiplier
     end
 
-    point.value = math.max(0.0, math.min(1.0, float_newvalue))
+    point.value = math.max(0.0, math.min(1.0, float_newvalue + float_offset))
     table.insert(new_points, point)
   end
 
@@ -87,37 +77,69 @@ local function show_dialog()
 
   -- The ViewBuilder is the basis
   vb = renoise.ViewBuilder()
-
+  local LABEL_WIDTH = 70
   -- The content of the dialog, built with the ViewBuilder.
   local content_1 =
     vb:row {
-    vb:text {
-      text = "Multiply by:"
-    },
-    vb:slider {
-      id = "multiplier_slider",
-      value = 1,
-      min = 0,
-      max = 2,
-      notifier = function(v)
-        vb.views.multiplier.value = v
-      end,
-      width = 150
-    },
-    vb:valuefield {
-      id = "multiplier",
-      value = 1,
-      min = 0,
-      max = 2,
-      notifier = function(v)
-        vb.views.multiplier_slider.value = v
-      end
+    vb:column {
+      spacing = 10,
+      vb:row {
+        vb:text {
+          width = LABEL_WIDTH,
+          text = "Multiply by:"
+        },
+        vb:slider {
+          id = "multiplier_slider",
+          value = 1,
+          min = 0,
+          max = 2,
+          notifier = function(v)
+            vb.views.multiplier.value = v
+          end,
+          width = 150
+        },
+        vb:valuefield {
+          id = "multiplier",
+          value = 1,
+          min = 0,
+          max = 2,
+          notifier = function(v)
+            vb.views.multiplier_slider.value = v
+          end
+        }
+      },
+      vb:row {
+        vb:text {
+          width = LABEL_WIDTH,
+          text = "Offset by:"
+        },
+        vb:slider {
+          id = "offset_slider",
+          value = 0,
+          min = -1,
+          max = 1,
+          notifier = function(v)
+            vb.views.offset.value = v
+          end,
+          width = 150
+        },
+        vb:valuefield {
+          id = "offset",
+          value = 0,
+          min = -1,
+          max = 1,
+          notifier = function(v)
+            vb.views.offset_slider.value = v
+          end
+        }
+      }
     }
   }
+
   local content_2 =
     vb:row {
     vb:text {
-      text = "All track automation:"
+      text = "All parameter automation in track:"
     },
     vb:checkbox {
       value = options.set_all_automation.value,
@@ -127,13 +149,12 @@ local function show_dialog()
     }
   }
 
-  local rns = renoise.song()
-
   local button =
     vb:button {
     text = "GO!",
     notifier = function()
       local float_multiplier = vb.views.multiplier_slider.value
+      local float_offset = vb.views.offset_slider.value
       local automation = nil
       local parameter = rns.selected_parameter
 
@@ -148,14 +169,14 @@ local function show_dialog()
             automation = ptrk:find_automation(parameter)
 
             if (automation ~= nil) then
-              process_points(automation, float_multiplier)
+              process_points(automation, float_multiplier, float_offset)
             end
           end
         else
           automation = rns.selected_pattern_track:find_automation(parameter)
 
           if (automation ~= nil) then
-            process_points(automation, float_multiplier)
+            process_points(automation, float_multiplier, float_offset)
           end
         end
       end
@@ -173,6 +194,10 @@ local function show_dialog()
       margin = 10,
       content_2
     }
+    -- vb:row {
+    --   margin = 10,
+    --   content_3
+    -- }
   }
 
   -- A custom dialog is non-modal and displays a user designed
