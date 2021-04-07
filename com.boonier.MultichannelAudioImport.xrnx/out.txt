@@ -1,0 +1,10 @@
+
+Input File     : '/Users/boonier/another_skipper.wav'
+Channels       : 12
+Sample Rate    : 44100
+Precision      : 16-bit
+Duration       : 00:02:07.29 = 5613541 samples = 9546.84 CDDA sectors
+File Size      : 135M
+Bit Rate       : 8.47M
+Sample Encoding: 16-bit Signed Integer PCM
+

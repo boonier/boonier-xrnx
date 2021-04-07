@@ -11,11 +11,14 @@ renoise.tool().preferences = options
 --[[============================================================================
 main.lua
 ============================================================================]]
-local rns = renoise.song()
 local dialog = nil
 -- Placeholder to expose the ViewBuilder outside the show_dialog() function
 local vb = nil
-local all_automation = false
+local rns = nil
+
+function init()
+  rns = renoise.song()
+end
 
 -- Read from the manifest.xml file.
 class "RenoiseScriptingTool"(renoise.Document.DocumentNode)
@@ -30,7 +33,7 @@ local ok, err = manifest:load_from("manifest.xml")
 local tool_name = manifest:property("Name").value
 local tool_id = manifest:property("Id").value
 
-print(tool_name .. " updated/loaded!")
+print(tool_name .. " / " .. tool_id .. " updated/loaded!")
 --------------------------------------------------------------------------------
 -- Main functions
 --------------------------------------------------------------------------------
@@ -245,3 +248,35 @@ renoise.tool():add_midi_mapping {
   invoke = show_dialog
 }
 --]]
+--------------------------------------------------------------------------------
+-- notifications
+--------------------------------------------------------------------------------
+
+-- renoise.tool().app_idle_observable:add_notifier(function()
+--   --TRACE("main:app_idle_observable fired...")
+--   if ntrap
+--     and waiting_to_show_dialog
+--     and ntrap._settings.autorun_enabled.value
+--   then
+--     waiting_to_show_dialog = false
+--     ntrap:show_dialog()
+--   end
+--   if ntrap:is_running() then
+--     ntrap:_on_idle()
+--   end
+
+-- end)
+
+-- renoise.tool().app_release_document_observable:add_notifier(function()
+--   TRACE("main:app_release_document_observable fired...")
+--   if ntrap:is_running() then
+--     ntrap:detach_from_song()
+--   end
+
+-- end)
+
+renoise.tool().app_new_document_observable:add_notifier(
+  function()
+    init()
+  end
+)

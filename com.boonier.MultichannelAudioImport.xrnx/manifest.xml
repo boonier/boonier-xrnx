@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RenoiseScriptingTool doc_version="0">
+  <ApiVersion>6</ApiVersion>
+  <AutoUpgraded>true</AutoUpgraded>
+  <Id>com.boonier.MultichannelAudioImport</Id>
+  <Version>1.0</Version>
+  <Author>boonier</Author>
+  <Name>Import Multichannel Audio</Name>
+  <Category>Tool Development</Category>
+  <Description>TBC</Description>
+  <Homepage>http://scripting.renoise.com</Homepage>
+</RenoiseScriptingTool>
