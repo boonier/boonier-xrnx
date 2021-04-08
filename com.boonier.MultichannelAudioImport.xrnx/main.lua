@@ -6,7 +6,7 @@ if os.platform() == "MACINTOSH" then
 end
 
 renoise.tool():add_menu_entry {
-  name = "Main Menu:Tools:Import Multi-channel File",
+  name = "Main Menu:Tools:Multi-channel File to Instruments",
   invoke = function()
     pretty_hello_world()
   end
@@ -32,14 +32,13 @@ local channels_info_text =
 }
 local dialog_content = {}
 local inputs_container = nil
-
 function pretty_hello_world()
   -- Beside of texts, controls and backgrounds and so on, the viewbuilder also
   -- offers some helper views which will help you to 'align' and stack views.
 
   -- lets start by creating a view builder again:
   -- local vb = renoise.ViewBuilder()
-  local dialog_title = "Import Multi-channel Audio"
+  local dialog_title = "Multichannel Audio to Instruments"
 
   -- get some consts to let the dialog look like Renoises default views...
   -- local DEFAULT_MARGIN = renoise.ViewBuilder.DEFAULT_CONTROL_MARGIN
@@ -48,22 +47,16 @@ function pretty_hello_world()
     vb:textfield {
     width = 500,
     text = "",
+    visible = false,
     notifier = function()
-      -- print("sending to sox")
-      -- print(id.text)
-      -- os.execute("sox ~/another_skipper.wav ~/output.wav remix 1")
     end
   }
 
-  -- start with a 'column' to stack other views vertically:
   dialog_content =
     vb:column {
-    -- set a border of DEFAULT_MARGIN around our main content
     margin = DEFAULT_MARGIN,
     height = "100%",
-    -- and create another column to align our text in a different background
     vb:column {
-      -- add again some "borders" to make it more pretty
       margin = DEFAULT_MARGIN,
       spacing = CONTENT_SPACING,
       vb:text {
@@ -98,13 +91,8 @@ function pretty_hello_world()
       }
     }
   }
-  renoise.app():show_custom_dialog(dialog_title, dialog_content)
-end
 
---This function finds the filename when given a complete path
-function GetFilename(path)
-  local start, finish = path:find("[%w%s!-={-|]+[_%.].+")
-  return path:sub(start, #path)
+  renoise.app():show_custom_dialog(dialog_title, dialog_content)
 end
 
 function update_ui(file_info, num_chans, file_path)
@@ -116,16 +104,13 @@ function update_ui(file_info, num_chans, file_path)
   channels_info_text.text = ""
   local hdr_arr = {}
   for line in header:lines() do
-    channels_info_text.text = channels_info_text.text .. line .. "\n"
-    table.insert(hdr_arr, line)
+    if string.len(line) > 0 then
+      channels_info_text.text = channels_info_text.text .. line .. "\n"
+      table.insert(hdr_arr, line)
+    end
   end
 
-  -- trim empty slots
-  table.remove(hdr_arr, 1)
-  table.remove(hdr_arr, 9)
-
-  rprint(hdr_arr)
-  -- print(table.count(hdr_arr))
+  -- rprint(hdr_arr)
 
   -- extract number of channels
   for line in file:lines() do
@@ -144,29 +129,35 @@ function update_ui(file_info, num_chans, file_path)
     margin = DEFAULT_MARGIN
   }
 
+  local file_name = file_path:match("[^/]+$"):gsub(".wav", "")
+  local file_name_extension = file_path:match("[^.]+$")
+
+  -- print(file_name)
+  -- print(file_name_extension)
+  --
+
+  --[[ 
+    create a array of tables to hold data for each channel so:
+    {
+      id = number,
+      active= boolean,
+      file_name = string,
+      link = boolean,
+    }
+  ]]
   local channels = {}
-  local file_name = hdr_arr[1]:match("[^/]+$"):gsub(".wav'", "")
-  local file_name_extension = hdr_arr[1]:match("[^.]+$"):match("%a+")
-
-  print(hdr_arr[1]:match("[^.]+$"):match("%a+"))
-  print(hdr_arr[1]:match("[^.]+$"))
-
-  -- print((file_name:gsub(".wav'", "")))
-  -- print() -- To match file name
-  -- print(file_name:match "[^.]+$") -- To match file extension
-  -- print(file_name:match "([^/]-([^.]+))$") -- To match file name + file extension
-
   for i = 1, nchans, 1 do
+    local bool = {true, false}
     local tb =
       vb:textfield {
       text = file_name .. "[" .. i .. "]." .. file_name_extension,
-      width = 300
+      width = 300,
+      active = bool[math.random(1, 2)]
     }
-
     table.insert(channels, tb)
-
     inputs_container:add_child(tb)
   end
+  rprint(channels)
 
   local links_container =
     vb:column {
@@ -185,10 +176,21 @@ function update_ui(file_info, num_chans, file_path)
   end
 
   local bits =
+    vb:column {
+    vb:column {
+      vb:text {
+        text = "Choose channels to import",
+        font = "bold"
+      }
+    },
     vb:row {
-    inputs_container,
-    links_container
+      inputs_container,
+      links_container
+    }
   }
+
+  -- meat_container:add_child(meat_label)
+  -- meat_container:add_child(bits)
 
   dialog_content:add_child(bits)
 end
